@@ -3,8 +3,11 @@ package com.educandoweb.course.service;
 import com.educandoweb.course.entities.User;
 import com.educandoweb.course.repository.UserRepository;
 
+import com.educandoweb.course.service.exception.DataBaseException;
 import com.educandoweb.course.service.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +37,14 @@ public class UserService {
     }
 
     public void delete(Long id){
-        repository.deleteById(id);
+        try {
+            repository.deleteById(id);
+
+        }catch (EmptyResultDataAccessException e){
+            throw new ResourceNotFoundException(id);
+        }catch (DataIntegrityViolationException e){
+            throw  new DataBaseException("You can't delete this user. There is Pending requests.");
+        }
     }
 
     public User update(Long id, User obj){
